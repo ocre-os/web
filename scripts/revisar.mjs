@@ -40,7 +40,8 @@ for (const f of archivos) {
 }
 
 // 2. Que el sitio no choque con lo que ya vive en public_html.
-const reservados = ['apps', 'assets', '_respaldo', 'OLDROOT', 'drive', 'webstore', '.well-known'];
+// Deben coincidir con PROTEGIDOS en despliegue/sincronizar.sh.
+const reservados = ['apps', 'cancuntodoincluido', 'drive', 'gimpresos', 'hookahshop.mx', 'webstore', '_respaldo', 'OLDROOT', '.well-known', 'cgi-bin'];
 for (const f of archivos) {
   const primero = rel(f).split('/')[0];
   if (reservados.includes(primero)) errores.push(`Ruta reservada en el hosting: ${rel(f)}`);

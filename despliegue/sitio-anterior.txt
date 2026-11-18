@@ -1,0 +1,10 @@
+# Archivos del sitio anterior de ocre.mx (estático, julio 2026).
+# En la primera publicación se MUEVEN a ~/respaldos-web/ (fuera de public_html).
+# Una ruta por línea, relativa al destino. Las rutas protegidas se ignoran.
+index.html
+favicon.svg
+logo.svg
+hero-video.mp4
+og-image.jpg
+og-image.png
+assets
