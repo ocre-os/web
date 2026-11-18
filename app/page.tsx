@@ -4,7 +4,7 @@ export default function Inicio() {
   return (
     <main style={{ fontFamily: 'system-ui, sans-serif', padding: '4rem 1.5rem', maxWidth: 640, margin: '0 auto' }}>
       <h1>OCRE</h1>
-      <p>Prueba de despliegue del nuevo sitio.</p>
+      <p>Sitio en construcción.</p>
     </main>
   );
 }
