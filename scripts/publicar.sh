@@ -81,10 +81,11 @@ El código fuente está en la rama \`main\` (commit \`$ORIGEN\`).
 EOF
 
 # Construye el commit de la rama de despliegue sin tocar el árbol de trabajo.
-export GIT_INDEX_FILE="$TMP/.indice"
-git --work-tree="$TMP" add -A -f -- . ':!.indice'
-ARBOL="$(git write-tree)"
-unset GIT_INDEX_FILE
+# El índice temporal vive fuera de $TMP para que no entre en el commit.
+INDICE="$(mktemp -u)"
+GIT_INDEX_FILE="$INDICE" git --work-tree="$TMP" add -A -f -- .
+ARBOL="$(GIT_INDEX_FILE="$INDICE" git write-tree)"
+rm -f "$INDICE" "$INDICE.lock"
 
 PADRE=()
 if traer "$RAMA"; then
