@@ -1,0 +1,6 @@
+---
+# Generado por scripts/publicar.sh — no editar a mano.
+# Entorno: produccion · commit de origen en main: d1e469fc23543d205f64019eb3d10efef1e600dc
+deployment:
+  tasks:
+    - /bin/bash despliegue/sincronizar.sh /home/ocre/public_html produccion
