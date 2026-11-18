@@ -1,61 +1,69 @@
 # Despliegue de ocre.mx
 
-El hosting (GoDaddy, cPanel con CloudLinux) **no tiene shell ni Node.js**. Solo sirve
-archivos. Por eso el sitio se compila fuera del servidor como HTML estático y cPanel
-lo descarga de GitHub con **Git™ Version Control**, el mismo mecanismo que ya usa
-`ocre-os/apps` (comprobado: "Deploy HEAD Commit" funciona sin shell).
+El hosting (GoDaddy, cPanel con CloudLinux) **no tiene shell ni Node.js**: solo sirve
+archivos. El sitio se compila fuera del servidor como HTML estático, se sube a GitHub, y
+cPanel lo descarga con **Git™ Version Control**. No depende de la X280 ni de GitHub Actions.
 
-No depende de la X280 ni de GitHub Actions.
+DNS: Cloudflare. `ocre.mx` es un registro A (solo DNS) hacia el hosting; `pruebas.ocre.mx`
+es un CNAME hacia `ocre.mx` con proxy (igual que `apps.ocre.mx`).
 
 ## Ramas
 
 | Rama | Contenido | Quién la escribe |
 |---|---|---|
 | `main` | Código fuente (Next.js) | Commits normales |
-| `deploy-pruebas` | Sitio compilado + `.cpanel.yml` hacia el subdominio de pruebas | `scripts/publicar.sh pruebas` |
-| `deploy-produccion` | El **mismo** sitio aprobado en pruebas + `.cpanel.yml` hacia `public_html` | `scripts/publicar.sh produccion` |
+| `deploy-produccion` | Sitio compilado + sincronizador → `ocre.mx` | `bash scripts/publicar.sh produccion` |
+| `deploy-pruebas` | Sitio compilado + sincronizador → `pruebas.ocre.mx` (opcional) | `bash scripts/publicar.sh pruebas` |
 
-Producción nunca se recompila: publica byte por byte lo que se revisó en pruebas.
 Cada commit de despliegue guarda en `ORIGEN` el commit de `main` del que salió.
 
 ## Repositorios en cPanel
 
 | Ruta en el servidor | Rama | Publica en |
 |---|---|---|
-| `/home/ocre/web-pruebas` | `deploy-pruebas` | `/home/ocre/pruebas.ocre.mx/` (subdominio pruebas.ocre.mx) |
-| `/home/ocre/web-produccion` | `deploy-produccion` | `/home/ocre/public_html/` (ocre.mx) |
+| `/home/ocre/web-produccion` | `deploy-produccion` | `/home/ocre/public_html` (ocre.mx) |
+| `/home/ocre/web-pruebas` | `deploy-pruebas` | `/home/ocre/pruebas.ocre.mx` |
 
 ## Flujo
 
 1. Cambios en `main` (commit y push).
-2. `bash scripts/publicar.sh pruebas` → compila, ejecuta `scripts/revisar.mjs` y sube a `deploy-pruebas`.
-3. cPanel › Git™ Version Control › `web-pruebas` › Pull or Deploy › **Update from Remote** y **Deploy HEAD Commit**.
-4. Revisión visual en https://pruebas.ocre.mx (móvil y escritorio, página por página).
-5. **Solo con aprobación explícita de OCRE:** `bash scripts/publicar.sh produccion` y los mismos dos botones en `web-produccion`.
+2. `bash scripts/publicar.sh produccion` → compila, ejecuta `scripts/revisar.mjs` y sube a `deploy-produccion`.
+3. cPanel › Git™ Version Control › `OCRE Web (produccion)` › Pull or Deploy ›
+   **Update from Remote** y **Deploy HEAD Commit**.
+4. Comprobar la bitácora y el sitio:
+   - `~/.ocre-web/produccion/despliegues.log` (Administrador de archivos), y
+   - https://ocre.mx en móvil y escritorio.
 
-## Qué toca y qué no toca el despliegue en producción
+## Qué hace el despliegue en el servidor (`despliegue/sincronizar.sh`)
 
-- Reemplaza la carpeta `_next/` y copia encima los archivos del sitio (`index.html`, páginas, imágenes de `public/`).
-- **Nunca vacía `public_html`.** Ahí viven `apps/`, las carpetas de los dominios adicionales y respaldos.
-- No publica `.htaccess` (el del servidor se conserva). `scripts/revisar.mjs` bloquea rutas
-  que chocan con carpetas existentes del hosting (`apps`, `assets`, `drive`, etc.).
-- Las páginas que se eliminen del sitio quedan como archivos huérfanos en el servidor;
-  se borran a mano desde el Administrador de archivos cuando haga falta.
+- Deja el destino **idéntico** al sitio publicado: copia lo nuevo, actualiza lo que cambió y
+  **borra** lo que se publicó antes y ya no existe (manifiesto en `~/.ocre-web/<entorno>/`).
+  Además limpia cualquier archivo de `_next/` que no pertenezca a la publicación actual.
+- **Nunca** crea, cambia ni borra rutas protegidas: `apps`, carpetas de los otros dominios
+  (`cancuntodoincluido`, `drive`, `gimpresos`, `hookahshop.mx`, `webstore`), `_respaldo`,
+  `OLDROOT`, `.well-known`, `.htaccess`, `.ftpquota`, `cgi-bin`, `.user.ini`, `php.ini`, `error_log`.
+  Si una publicación incluye alguna, se cancela entera.
+- Usa solo herramientas básicas (el entorno del hosting es restringido) y se detiene con error
+  si falta alguna.
+- En la primera publicación movió el sitio anterior a
+  `/home/ocre/respaldos-web/produccion-20261117-223423/` (fuera de `public_html`).
 
 ## Revertir
 
-Producción: volver a publicar un commit anterior de `deploy-produccion`.
+Volver a publicar un commit anterior de `deploy-produccion`:
 
 ```bash
-git fetch origin deploy-produccion
-git push origin <commit-anterior>:refs/heads/deploy-produccion --force-with-lease
+git fetch origin +refs/heads/deploy-produccion:refs/remotes/origin/deploy-produccion
+git log --oneline origin/deploy-produccion          # elegir el commit
+git push origin <commit>:refs/heads/deploy-produccion --force-with-lease
 ```
 
-Después, en cPanel: Update from Remote y Deploy HEAD Commit.
+Después, en cPanel: Update from Remote y Deploy HEAD Commit. El sincronizador borra lo que
+sobre y restaura lo que falte.
 
 ## Revisión automática (`npm run revisar`)
 
-Falla si encuentra: enlaces o recursos internos rotos, páginas sin `lang="es"`,
-`<title>` o `viewport`, imágenes sin `alt`, texto de relleno, referencias a localhost,
-`.htaccess`, `.env` o mapas de código en la publicación, o rutas reservadas del hosting.
+Falla si encuentra: enlaces o recursos internos rotos, páginas sin `lang="es"`, `<title>`
+o `viewport`, imágenes sin `alt`, texto de relleno, referencias a localhost, `.htaccess`,
+`.env` o mapas de código en la publicación, o rutas protegidas del hosting.
 Avisa de archivos de más de 1.5 MB.
