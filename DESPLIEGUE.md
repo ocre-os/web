@@ -50,16 +50,29 @@ Cada commit de despliegue guarda en `ORIGEN` el commit de `main` del que salió.
 
 ## Revertir
 
-Volver a publicar un commit anterior de `deploy-produccion`:
+Las ramas `deploy-*` solo avanzan: nunca se reescriben con `--force`, porque cPanel
+descarga con avance rápido y la descarga fallaría. Para volver atrás se revierte en
+`main` y se publica de nuevo:
 
 ```bash
-git fetch origin +refs/heads/deploy-produccion:refs/remotes/origin/deploy-produccion
-git log --oneline origin/deploy-produccion          # elegir el commit
-git push origin <commit>:refs/heads/deploy-produccion --force-with-lease
+git revert <commit-con-el-cambio>        # o varios commits
+git push origin main
+bash scripts/publicar.sh produccion
 ```
 
-Después, en cPanel: Update from Remote y Deploy HEAD Commit. El sincronizador borra lo que
-sobre y restaura lo que falte.
+El sincronizador borra lo que sobre y restaura lo que falte.
+
+## Despliegue automático (Cron Jobs)
+
+Una tarea programada de cPanel ejecuta cada 5 minutos:
+
+```
+/bin/bash /home/ocre/web-<entorno>/despliegue/auto.sh <entorno> >/dev/null 2>&1
+```
+
+Descarga la rama de GitHub y, solo si llegó un commit nuevo, ejecuta el despliegue.
+Así, publicar es solo `bash scripts/publicar.sh <entorno>`: en máximo 5 minutos el
+cambio está en el servidor. Bitácora: `~/.ocre-web/<entorno>/auto.log`.
 
 ## Revisión automática (`npm run revisar`)
 

@@ -46,7 +46,7 @@ elif [ ! -f "$TMP/sitio/robots.txt" ]; then
   printf 'User-agent: *\nAllow: /\n' > "$TMP/sitio/robots.txt"
 fi
 
-cp despliegue/sincronizar.sh "$TMP/despliegue/"
+cp despliegue/sincronizar.sh despliegue/auto.sh "$TMP/despliegue/"
 [ "$ENTORNO" = "produccion" ] && cp despliegue/sitio-anterior.txt "$TMP/despliegue/"
 echo "$ORIGEN" > "$TMP/ORIGEN"
 
