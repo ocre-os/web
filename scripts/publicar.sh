@@ -11,7 +11,7 @@
 set -euo pipefail
 
 ENTORNO="${1:-}"
-REMOTO="origin"
+REMOTO="${REMOTO:-origin}"
 RAIZ="$(git rev-parse --show-toplevel)"
 cd "$RAIZ"
 
