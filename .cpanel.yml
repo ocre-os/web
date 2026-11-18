@@ -1,6 +1,6 @@
 ---
 # Generado por scripts/publicar.sh — no editar a mano.
-# Entorno: pruebas · commit de origen en main: 0cbc704a419d161601325ec76357a0a432c796fc
+# Entorno: pruebas · commit de origen en main: 82fa90367ed59b3f15b8851116906f32ac7e36e1
 deployment:
   tasks:
     - /bin/bash despliegue/sincronizar.sh /home/ocre/pruebas.ocre.mx pruebas
