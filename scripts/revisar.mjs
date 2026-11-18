@@ -83,7 +83,16 @@ for (const f of html) {
   }
 }
 
-// 4. Peso: avisa de archivos grandes que vuelven lento el sitio.
+// 4. CSS compilado: el minificador puede meter font-stretch en porcentaje dentro del
+//    atajo `font`, lo que el navegador descarta completo (pasó con los botones de equipos).
+for (const f of archivos.filter((x) => x.endsWith('.css'))) {
+  const css = await readFile(f, 'utf8');
+  for (const m of css.matchAll(/font:[^;}]*\d+%\s+\d[^;}]*/g)) {
+    errores.push(`${rel(f)}: regla de fuente inválida (usa propiedades separadas): ${m[0].slice(0, 70)}`);
+  }
+}
+
+// 5. Peso: avisa de archivos grandes que vuelven lento el sitio.
 for (const f of archivos) {
   const { size } = await stat(f);
   if (size > 1_500_000) avisos.push(`${rel(f)} pesa ${(size / 1e6).toFixed(1)} MB`);
