@@ -21,6 +21,9 @@ DESTINO_PRUEBAS="/home/ocre/pruebas.ocre.mx/"
 DESTINO_PRODUCCION="/home/ocre/public_html/"
 
 falla() { echo "ERROR: $*" >&2; exit 1; }
+# Descarga una rama del remoto a refs/remotes/<remoto>/<rama> sin depender
+# de la configuración del clon. Devuelve 1 si la rama no existe.
+traer() { git fetch -q "$REMOTO" "+refs/heads/$1:refs/remotes/$REMOTO/$1" 2>/dev/null; }
 
 case "$ENTORNO" in
   pruebas)    RAMA="deploy-pruebas";    DESTINO="$DESTINO_PRUEBAS" ;;
@@ -35,7 +38,7 @@ trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/sitio"
 
 if [ "$ENTORNO" = "pruebas" ]; then
-  git fetch -q "$REMOTO" main
+  traer main || falla "no se pudo descargar main de $REMOTO."
   [ "$(git rev-parse HEAD)" = "$(git rev-parse "$REMOTO/main")" ] \
     || falla "HEAD no coincide con $REMOTO/main; publica solo commits ya subidos a main."
   ORIGEN="$(git rev-parse HEAD)"
@@ -48,7 +51,7 @@ if [ "$ENTORNO" = "pruebas" ]; then
   # Pruebas nunca debe aparecer en buscadores.
   printf 'User-agent: *\nDisallow: /\n' > "$TMP/sitio/robots.txt"
 else
-  git fetch -q "$REMOTO" deploy-pruebas
+  traer deploy-pruebas || falla "no existe deploy-pruebas: publica primero en pruebas."
   git archive "$REMOTO/deploy-pruebas" sitio ORIGEN | tar -x -C "$TMP"
   ORIGEN="$(cat "$TMP/ORIGEN")"
   rm -f "$TMP/sitio/robots.txt"
@@ -84,7 +87,7 @@ ARBOL="$(git write-tree)"
 unset GIT_INDEX_FILE
 
 PADRE=()
-if git fetch -q "$REMOTO" "$RAMA" 2>/dev/null; then
+if traer "$RAMA"; then
   PADRE=(-p "$REMOTO/$RAMA")
   if [ "$(git rev-parse "$REMOTO/$RAMA^{tree}")" = "$ARBOL" ]; then
     echo "Sin cambios: $RAMA ya contiene esta publicación."; exit 0
