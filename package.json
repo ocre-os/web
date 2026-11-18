@@ -1,0 +1,25 @@
+{
+  "name": "ocre-web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Sitio web ocre.mx (Next.js, exportación estática)",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "revisar": "node scripts/revisar.mjs",
+    "publicar": "bash scripts/publicar.sh"
+  },
+  "dependencies": {
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "typescript": "7.0.2"
+  }
+}
