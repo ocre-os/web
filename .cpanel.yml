@@ -1,0 +1,9 @@
+---
+# Generado por scripts/publicar.sh — no editar a mano.
+# Entorno: pruebas · commit de origen en main: 1fa8e14fa59ac924d355428aff9ee0204230ce43
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/ocre/pruebas.ocre.mx/
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/rm -rf ${DEPLOYPATH}_next
+    - /bin/cp -R sitio/. $DEPLOYPATH
