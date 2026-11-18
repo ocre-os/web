@@ -1,3 +1,5 @@
+:HL["/_next/static/chunks/41r2edz3pe6pw.css","style"]
+:HL["/fonts/archivo-var.woff2","font",{"crossOrigin":"anonymous","type":"font/woff2"}]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":"/_not-found","h":96,"c":"$Q2"}]]
-0:{"b":"rQJaxGB-fATQn01aVBsk4","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"tSf7JLHgQMJ049QgoCLuA","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
