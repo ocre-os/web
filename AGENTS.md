@@ -17,3 +17,6 @@ Sitio web público de OCRE (ocre.mx). Next.js con exportación estática (`outpu
 - Relevo entre agentes: el agente relevado no hace modificaciones al código.
 
 Detalle del flujo: [DESPLIEGUE.md](DESPLIEGUE.md).
+
+Recursos visuales para UI/UX (VP0 y 21st.dev, con la regla de la cuota diaria gratuita):
+[docs/recursos-ui.md](docs/recursos-ui.md). Servidores MCP del proyecto en `.mcp.json`.
